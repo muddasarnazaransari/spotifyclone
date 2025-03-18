@@ -1,5 +1,5 @@
 console.log("Let's add some JavaScript");
-console.log("raw audio added");
+console.log("audio fetch added");
 let currentSong = new Audio();
 let currentIndex;
 console.log("song: ", currentSong);
@@ -243,9 +243,10 @@ async function main()
         })
     })
 
-    musicPlay.addEventListener("click" ,() =>
+    musicPlay.addEventListener("click" , async () =>
     {
-        let audio = new Audio("https://github.com/muddasarnazaransari/spotifyclone/blob/main/Playlist/Bollywood/Dulhe%20Ka%20Sehrr.mp3?raw=true");
+        let audiofetch = await fetch("https://github.com/muddasarnazaransari/spotifyclone/blob/main/Playlist/Bollywood/Dulhe%20Ka%20Sehrr.mp3?raw=true");
+        let audio = new Audio(audiofetch);
         audio.play();
     });
 
