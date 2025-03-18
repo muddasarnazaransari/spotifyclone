@@ -1,5 +1,5 @@
 console.log("Let's add some JavaScript");
-console.log("new changes success");
+console.log("new changes");
 
 let currentSong = new Audio();
 let currentIndex = 0;
@@ -9,7 +9,7 @@ console.log("Song: ", currentSong);
 
 async function getPlaylistsURL() {
     try {
-        let response = await fetch("Playlist/");
+        let response = await fetch("/Playlist");
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -36,7 +36,7 @@ async function getPlaylistsURL() {
 
 async function getImageExtension(currentPlaylist) {
     try {
-        let response = await fetch(`Playlist/${encodeURIComponent(currentPlaylist)}/`);
+        let response = await fetch(`/Playlist/${encodeURIComponent(currentPlaylist)}`);
         let text = await response.text();
         let div = document.createElement("div");
         div.innerHTML = text;
@@ -67,7 +67,7 @@ async function displayPlaylist(playlists) {
     for (let folder of playlists) {
         let imageName = await getImageExtension(folder);
         try {
-            let getInfo = await fetch(`Playlist/${folder}/info.json`);
+            let getInfo = await fetch(`/Playlist/${folder}/info.json`);
             let response = await getInfo.json();
 
             cardContainer.innerHTML += `
@@ -89,7 +89,7 @@ async function displayPlaylist(playlists) {
 
 async function getSongs(currentPlaylist) {
     try {
-        let response = await fetch(`Playlist/${encodeURIComponent(currentPlaylist)}/`);
+        let response = await fetch(`/Playlist/${encodeURIComponent(currentPlaylist)}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
