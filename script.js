@@ -111,7 +111,7 @@ async function getSongs(currentPlaylist) {
         }
     }
     try {
-        let response = await fetch(`./Playlist/${newCurrentPlaylist}/`);
+        let response = await fetch(`/Playlist/${newCurrentPlaylist}/`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
