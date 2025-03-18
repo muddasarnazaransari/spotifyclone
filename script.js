@@ -1,5 +1,5 @@
 console.log("Let's add some JavaScript");
-console.log("hta access added");
+console.log("raw audio added");
 let currentSong = new Audio();
 let currentIndex;
 console.log("song: ", currentSong);
@@ -245,21 +245,8 @@ async function main()
 
     musicPlay.addEventListener("click" ,() =>
     {
-        if(currentSong.src)
-        {
-            if(currentSong.paused)
-            {
-                playButton.style.display = "none";
-                pauseButton.style.display = "block";
-                currentSong.play();
-            }
-            else
-            {
-                playButton.style.display = "block";
-                pauseButton.style.display = "none";
-                currentSong.pause();
-            }
-        }
+        let audio = new Audio("https://github.com/muddasarnazaransari/spotifyclone/blob/main/Playlist/Bollywood/Dulhe%20Ka%20Sehrr.mp3?raw=true");
+        audio.play();
     });
 
 
