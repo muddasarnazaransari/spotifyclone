@@ -1,12 +1,12 @@
 console.log("Let's add some JavaScript");
-console.log("audio fetch added");
+console.log("locally running success");
 let currentSong = new Audio();
 let currentIndex;
 console.log("song: ", currentSong);
 
 async function getPlaylistsURL() {
     try {
-        let response = await fetch("/Playlist/");
+        let response = await fetch("Playlist/");
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -16,13 +16,11 @@ async function getPlaylistsURL() {
         let div = document.createElement("div");
         div.innerHTML = text;
         let ancor = div.getElementsByTagName("a");
-        console.log("Ancor : ", ancor);
         let playlists = [];
-        console.log("Folder Name : ");
         for(let index = 0; index < ancor.length; index++)
         {
             const element = ancor[index];
-            if (element.href.toLowerCase().includes("playlist/") && !e.href.includes(".htaccess")) {
+            if (element.href.toLowerCase().includes("playlist/")) {
                 console.log(element.href)
                 playlists.push(element.href);
             }
@@ -36,7 +34,7 @@ async function getPlaylistsURL() {
 
 async function getImageExtention(currentPlaylist)
 {
-    let response = await fetch(`/Playlist/${currentPlaylist}/`);
+    let response = await fetch(`Playlist/${currentPlaylist}/`);
 
     let text = await response.text(); 
     let div = document.createElement("div");
@@ -87,7 +85,7 @@ async function displayPlaylist(playlists){
                                                                 <div class="play-btn">
                                                                     <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 24 24"><path d="m7.05 3.606 13.49 7.788a.7.7 0 0 1 0 1.212L7.05 20.394A.7.7 0 0 1 6 19.788V4.212a.7.7 0 0 1 1.05-.606z" fill="currentColor"></path></svg>
                                                                 </div>
-                                                                <img src="/Playlist/${folder}/${imageName}" alt="suzume playlist">
+                                                                <img src="Playlist/${folder}/${imageName}" alt="suzume playlist">
                                                                 <h2>${response.title}</h2>
                                                                 <p>${response.description}</p>
                                                             </div>
@@ -111,7 +109,7 @@ async function getSongs(currentPlaylist) {
         }
     }
     try {
-        let response = await fetch(`/Playlist/${newCurrentPlaylist}/`);
+        let response = await fetch(`Playlist/${newCurrentPlaylist}/`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -245,9 +243,21 @@ async function main()
 
     musicPlay.addEventListener("click" , async () =>
     {
-        let audiofetch = await fetch("https://github.com/muddasarnazaransari/spotifyclone/blob/main/Playlist/Bollywood/Dulhe%20Ka%20Sehrr.mp3?raw=true");
-        let audio = new Audio(audiofetch);
-        audio.play();
+        if(currentSong.src)
+            {
+                if(currentSong.paused)
+                {
+                    playButton.style.display = "none";
+                    pauseButton.style.display = "block";
+                    currentSong.play();
+                }
+                else
+                {
+                    playButton.style.display = "block";
+                    pauseButton.style.display = "none";
+                    currentSong.pause();
+                }
+            }
     });
 
 
