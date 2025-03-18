@@ -1,8 +1,11 @@
 console.log("Let's add some JavaScript");
-console.log("locally running success");
+console.log("new changes success");
+
 let currentSong = new Audio();
-let currentIndex;
-console.log("song: ", currentSong);
+let currentIndex = 0;
+let songs = [];
+
+console.log("Song: ", currentSong);
 
 async function getPlaylistsURL() {
     try {
@@ -17,99 +20,76 @@ async function getPlaylistsURL() {
         div.innerHTML = text;
         let ancor = div.getElementsByTagName("a");
         let playlists = [];
-        for(let index = 0; index < ancor.length; index++)
-        {
-            const element = ancor[index];
+
+        for (let element of ancor) {
             if (element.href.toLowerCase().includes("playlist/")) {
-                console.log(element.href)
+                console.log(element.href);
                 playlists.push(element.href);
             }
         }
         return playlists;
-    }catch(error)
-    {
-        console.error("Error !!", error);
+    } catch (error) {
+        console.error("Error fetching playlists:", error);
+        return [];
     }
 }
 
-async function getImageExtention(currentPlaylist)
-{
-    let response = await fetch(`Playlist/${currentPlaylist}/`);
+async function getImageExtension(currentPlaylist) {
+    try {
+        let response = await fetch(`Playlist/${encodeURIComponent(currentPlaylist)}/`);
+        let text = await response.text();
+        let div = document.createElement("div");
+        div.innerHTML = text;
 
-    let text = await response.text(); 
-    let div = document.createElement("div");
-    div.innerHTML = text;
-    console.log("Divs of images :" ,div);
-    let anchor = div.getElementsByTagName("a");
-    console.log(anchor);
-    let imageName;
+        let anchor = div.getElementsByTagName("a");
+        const imageFormats = ["jpg", "jpeg", "png", "webp"];
 
-    //List of audio file extensions
-    const imageFormats = ["jpg", "jpeg", "png", "webp"];
-
-    for(let index = 0; index < anchor.length; index++)
-    {
-        const element = anchor[index];
-        if(imageFormats.some(ext => element.href.toLowerCase().endsWith(ext)))
-        {
-            let imageURL = element.href.split("/");
-            imageName = imageURL[imageURL.length - 1];
-            console.log("Image Name : ", imageName);
-            break;
+        for (let element of anchor) {
+            if (imageFormats.some(ext => element.href.toLowerCase().endsWith(ext))) {
+                let imageURL = element.href.split("/");
+                return imageURL[imageURL.length - 1];
+            }
         }
+    } catch (error) {
+        console.error("Error fetching image:", error);
     }
-    return imageName;
+    return "default.jpg"; // Fallback image
 }
 
-async function getPlaylists(playlistURL)
-{
-    let playlist = [];
-    for(let index = 0; index < playlistURL.length; index++)
-    {
-        let temp = playlistURL[index].split("/");
-        playlist.push(temp[temp.length - 1]);
-    }
-    return playlist;
+async function getPlaylists(playlistURL) {
+    return playlistURL.map(url => url.split("/").pop());
 }
 
-async function displayPlaylist(playlists){
+async function displayPlaylist(playlists) {
     let cardContainer = document.querySelector(".cardContainer");
-    for(let index = 0; index < playlists.length; index++)
-    {
-        let folder = playlists[index];
-        let imageName = await getImageExtention(folder);
-        let getInfo = await fetch(`./Playlist/${folder}/info.json`);
-        let response = await getInfo.json();
-        cardContainer.innerHTML = cardContainer.innerHTML + `
-                                                            <div class="card" data-folder="${folder}">
-                                                                <div class="play-btn">
-                                                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 24 24"><path d="m7.05 3.606 13.49 7.788a.7.7 0 0 1 0 1.212L7.05 20.394A.7.7 0 0 1 6 19.788V4.212a.7.7 0 0 1 1.05-.606z" fill="currentColor"></path></svg>
-                                                                </div>
-                                                                <img src="Playlist/${folder}/${imageName}" alt="suzume playlist">
-                                                                <h2>${response.title}</h2>
-                                                                <p>${response.description}</p>
-                                                            </div>
-                                                            `
+    cardContainer.innerHTML = ""; // Clear existing cards
 
+    for (let folder of playlists) {
+        let imageName = await getImageExtension(folder);
+        try {
+            let getInfo = await fetch(`Playlist/${folder}/info.json`);
+            let response = await getInfo.json();
+
+            cardContainer.innerHTML += `
+                <div class="card" data-folder="${folder}">
+                    <div class="play-btn">
+                        <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="m7.05 3.606 13.49 7.788a.7.7 0 0 1 0 1.212L7.05 20.394A.7.7 0 0 1 6 19.788V4.212a.7.7 0 0 1 1.05-.606z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <img src="Playlist/${folder}/${imageName}" alt="Playlist Image">
+                    <h2>${response.title}</h2>
+                    <p>${response.description}</p>
+                </div>`;
+        } catch (error) {
+            console.error("Error fetching playlist info:", error);
+        }
     }
 }
 
 async function getSongs(currentPlaylist) {
-
-    let newCurrentPlaylist = "";
-    for(let index = 0; index < currentPlaylist.length; index++)
-    {
-        if(currentPlaylist[index] === " ")
-        {
-            newCurrentPlaylist += "%20";
-        }
-        else
-        {
-            newCurrentPlaylist += currentPlaylist[index];
-        }
-    }
     try {
-        let response = await fetch(`Playlist/${newCurrentPlaylist}/`);
+        let response = await fetch(`Playlist/${encodeURIComponent(currentPlaylist)}/`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -118,25 +98,19 @@ async function getSongs(currentPlaylist) {
         let text = await response.text(); 
         let div = document.createElement("div");
         div.innerHTML = text;
-        let ancor = div.getElementsByTagName("a");
-        let songs = [];
+        let anchor = div.getElementsByTagName("a");
 
-        //List of audio file extensions
+        songs = [];
         const audioFormats = [".mp3", ".wav", ".ogg", ".aac", ".flac", ".m4a", ".opus"];
 
-        for(let index = 0; index < ancor.length; index++)
-        {
-            const element = ancor[index];
-            if(audioFormats.some(ext => element.href.toLowerCase().endsWith(ext)))
-            {
+        for (let element of anchor) {
+            if (audioFormats.some(ext => element.href.toLowerCase().endsWith(ext))) {
                 songs.push(element.href);
             }
         }
 
-        //Listing Songs
-        let playlistUL = document.querySelector(".playList").getElementsByTagName("ul")[0];
-        playlistUL.innerHTML = "";
-        console.log("playlist UL", playlistUL);
+        let playlistUL = document.querySelector(".playList ul");
+        playlistUL.innerHTML = ""; // Clear existing list
 
         songs.forEach((songUrl, index) => {
             let li = document.createElement("li");
@@ -151,178 +125,84 @@ async function getSongs(currentPlaylist) {
                 <h5>${songName}</h5>
             `;
 
-            li.dataset.index = index; // Store song index in dataset
+            li.dataset.index = index;
+            li.addEventListener("click", () => playMusic(index));
             playlistUL.appendChild(li);
         });
 
-        let musicPlay = document.querySelector(".music-play");
-        let playButton = document.querySelector(".music-play-icon");
-        let pauseButton = document.querySelector(".music-pause-icon");
-        let isPlaying = false;
-    
-        // Attach event listener to all the songs.
-        Array.from(document.querySelector(".playList").getElementsByTagName("li")).forEach(e => {
-            e.addEventListener("click", element=>{
-                currentIndex = parseInt(e.dataset.index);
-                playMusic(currentIndex, songs);
-                playButton.style.display = "none";
-                pauseButton.style.display = "block";
-                console.log("Music play");
-            })
-        })
-
         return songs;
-    }catch(error)
-    {
-        console.error("Error !!", error);
+    } catch (error) {
+        console.error("Error fetching songs:", error);
+        return [];
     }
 }
 
-let secondsToMinuteFormat = (seconds) =>
-{
-    if(isNaN(seconds) || seconds < 0)
-    {
-        return "00:00";
-    }
-
-    let minute = Math.floor(seconds / 60);
-    let second = Math.floor(seconds % 60);
-
-    let minuteFormat = minute < 10 ? '0' + minute : minute;
-    let secondFormat = second < 10 ? '0' + second : second;
-
-    return `${minuteFormat} : ${secondFormat}`;
-}
-
-const playMusic = (currentIndex, songs) => {
+const playMusic = (index) => {
+    if (songs.length === 0) return;
+    currentIndex = index;
     currentSong.src = songs[currentIndex];
     currentSong.play();
+    togglePlayPause(true);
+};
+
+function getSongName(url) {
+    let filename = decodeURIComponent(url.split("/").pop());
+    return filename.split(".")[0];
 }
 
-function getSongName(url){
-    let path = url.split("/"); //This will return array
-    let filename = decodeURIComponent(path[path.length -1]);
-    let tempName = filename.split(".");
-    let songName = tempName[0];
-    return songName;
-}
+const togglePlayPause = (isPlaying) => {
+    document.querySelector(".music-play-icon").style.display = isPlaying ? "none" : "block";
+    document.querySelector(".music-pause-icon").style.display = isPlaying ? "block" : "none";
+};
 
-async function main()
-{
-
+async function main() {
     let playlistURL = await getPlaylistsURL();
-    console.log("Playlist URL : ", playlistURL);
-
     let playlists = await getPlaylists(playlistURL);
-    console.log("Playlist here  : ", playlists);
-
     await displayPlaylist(playlists);
 
-    //Current Playlist.
-    let currentPlaylist = decodeURIComponent(playlists[0]);
-    console.log("Playlist: ",currentPlaylist);
+    if (playlists.length > 0) {
+        await getSongs(playlists[0]);
+    }
 
-    let songs = await getSongs(currentPlaylist);
-    console.log(songs);
-
-    let musicPlay = document.querySelector(".music-play");
-    let playButton = document.querySelector(".music-play-icon");
-    let pauseButton = document.querySelector(".music-pause-icon");
-    let isPlaying = false;
-
-    // Attach event listener to all the songs.
-    Array.from(document.querySelector(".playList").getElementsByTagName("li")).forEach(e => {
-        e.addEventListener("click", element=>{
-            currentIndex = parseInt(e.dataset.index);
-            playMusic(currentIndex, songs);
-            playButton.style.display = "none";
-            pauseButton.style.display = "block";
-            console.log("Music play");
-        })
-    })
-
-    musicPlay.addEventListener("click" , async () =>
-    {
-        if(currentSong.src)
-            {
-                if(currentSong.paused)
-                {
-                    playButton.style.display = "none";
-                    pauseButton.style.display = "block";
-                    currentSong.play();
-                }
-                else
-                {
-                    playButton.style.display = "block";
-                    pauseButton.style.display = "none";
-                    currentSong.pause();
-                }
+    document.querySelector(".music-play").addEventListener("click", () => {
+        if (currentSong.src) {
+            if (currentSong.paused) {
+                currentSong.play();
+                togglePlayPause(true);
+            } else {
+                currentSong.pause();
+                togglePlayPause(false);
             }
+        }
     });
 
-
-    // To get current and total time
-    let currentTime = document.querySelector(".currentTime");
-    currentTime.innerHTML = "00:00";
-    let totalTime = document.querySelector(".totalTime");
-    totalTime.innerHTML = "00:00";
-
-    // Adding a listener to update the current and total time of the track.
-    currentSong.addEventListener("timeupdate", () => {
-        currentTime.innerHTML = secondsToMinuteFormat(currentSong.currentTime);
-        totalTime.innerHTML = secondsToMinuteFormat(currentSong.duration);
-        let progressBar = document.querySelector(".progress");
-        progressBar.style.width = (currentSong.currentTime / currentSong.duration) * 100 + "%";
+    document.querySelector("#previous").addEventListener("click", () => {
+        currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+        playMusic(currentIndex);
     });
 
-
-    //Adding an event listener to seek the audio from seek bar.
-    document.querySelector(".seekbar").addEventListener("click", e=> {
-        let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
-        document.querySelector(".progress").style.width = percent + "%";
-        currentSong.currentTime = currentSong.duration * (percent / 100);
-    })
-
-
-    // Adding an event listener to previous buttoon
-    document.querySelector("#previous").addEventListener("click", e => {
-        currentIndex = ((currentIndex - 1 + songs.length) % songs.length);
-        console.log("Index: ", currentIndex);
-        console.log("Songs Length : ", songs.length);
-        playMusic(currentIndex, songs);
-    })
-
-
-    // Adding an event listener to next buttoon
-    document.querySelector("#next").addEventListener("click", e => {
+    document.querySelector("#next").addEventListener("click", () => {
         currentIndex = (currentIndex + 1) % songs.length;
-        console.log("Index: ", currentIndex);
-        playMusic(currentIndex, songs);
-    })
+        playMusic(currentIndex);
+    });
 
+    document.querySelector(".seekbar").addEventListener("click", (e) => {
+        let percent = e.offsetX / e.target.getBoundingClientRect().width;
+        currentSong.currentTime = currentSong.duration * percent;
+    });
 
-    //Adding event listener to volume button.
     document.querySelector(".volume-seekbar").addEventListener("click", (e) => {
-        let seekbar = e.currentTarget;
-        let percentage = e.offsetX / seekbar.clientWidth;
-        
-        // Clamp the volume between 0 and 1
-        percentage = Math.max(0, Math.min(1, percentage));
-    
-        document.querySelector(".volume-progress-bar").style.width = (percentage * 100) + "%";
-        currentSong.volume = percentage;
+        let percent = e.offsetX / e.target.clientWidth;
+        currentSong.volume = Math.max(0, Math.min(1, percent));
+        document.querySelector(".volume-progress-bar").style.width = `${percent * 100}%`;
     });
 
-    //Load Playlist whenever card is clicked.
-    Array.from(document.querySelectorAll(".card")).forEach(e => {
-        e.addEventListener("click", async items => {
-            songs = await getSongs(items.currentTarget.dataset.folder);
-            playMusic(0, songs);
-            playButton.style.display = "none";
-            pauseButton.style.display = "block";
-        })
+    document.querySelectorAll(".card").forEach(card => {
+        card.addEventListener("click", async () => {
+            await getSongs(card.dataset.folder);
+            playMusic(0);
+        });
     });
-
 }
 
 main();
