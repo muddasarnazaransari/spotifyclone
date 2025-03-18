@@ -1,5 +1,5 @@
 console.log("Let's add some JavaScript");
-console.log("Latest Spotify clone");
+console.log("hta access added");
 let currentSong = new Audio();
 let currentIndex;
 console.log("song: ", currentSong);
@@ -22,7 +22,7 @@ async function getPlaylistsURL() {
         for(let index = 0; index < ancor.length; index++)
         {
             const element = ancor[index];
-            if (element.href.toLowerCase().includes("playlist/")) {
+            if (element.href.toLowerCase().includes("playlist/") && !e.href.includes(".htaccess")) {
                 console.log(element.href)
                 playlists.push(element.href);
             }
