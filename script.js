@@ -1,4 +1,5 @@
 console.log("Let's add some JavaScript");
+console.log("New Spotify clone");
 let currentSong = new Audio();
 let currentIndex;
 console.log("song: ", currentSong);
