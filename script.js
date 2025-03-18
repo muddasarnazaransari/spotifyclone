@@ -5,7 +5,7 @@ console.log("song: ", currentSong);
 
 async function getPlaylistsURL() {
     try {
-        let response = await fetch("http://127.0.0.1:5500/Portfolio%20Website/Projects/Spotify%20Clone/Playlist/");
+        let response = await fetch("./Playlist/");
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -35,7 +35,7 @@ async function getPlaylistsURL() {
 
 async function getImageExtention(currentPlaylist)
 {
-    let response = await fetch(`http://127.0.0.1:5500/Portfolio%20Website/Projects/Spotify%20Clone/Playlist/${currentPlaylist}/`);
+    let response = await fetch(`./Playlist/${currentPlaylist}/`);
 
     let text = await response.text(); 
     let div = document.createElement("div");
@@ -79,7 +79,7 @@ async function displayPlaylist(playlists){
     {
         let folder = playlists[index];
         let imageName = await getImageExtention(folder);
-        let getInfo = await fetch(`http://127.0.0.1:5500/Portfolio%20Website/Projects/Spotify%20Clone/Playlist/${folder}/info.json`);
+        let getInfo = await fetch(`./Playlist/${folder}/info.json`);
         let response = await getInfo.json();
         cardContainer.innerHTML = cardContainer.innerHTML + `
                                                             <div class="card" data-folder="${folder}">
@@ -110,7 +110,7 @@ async function getSongs(currentPlaylist) {
         }
     }
     try {
-        let response = await fetch(`http://127.0.0.1:5500/Portfolio%20Website/Projects/Spotify%20Clone/Playlist/${newCurrentPlaylist}/`);
+        let response = await fetch(`./Playlist/${newCurrentPlaylist}/`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
