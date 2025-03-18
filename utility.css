@@ -1,0 +1,68 @@
+:root{
+    --icon-width : 16px;
+    --icon-height : 16px;
+}
+
+.flex{
+    display: flex;
+}
+
+.justify-center{
+    justify-content: center;
+}
+
+.item-center{
+    align-items: center;
+}
+
+.invert{
+    filter: invert(1);
+}
+
+.bg-grey{
+    background-color: #121212;
+}
+
+.m-1{
+    margin: 5px;
+}
+
+.p-2{
+    padding: 20px;
+}
+
+.rounded{
+    border-radius: 10px;
+}
+
+.space-between{
+    justify-content: space-between;
+}
+
+.border{
+    border: 1px solid #13d654;
+}
+
+::-webkit-scrollbar {
+    width: 20px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #282828;
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3e3e3e; 
+}
+
+.scroll-hidden::-webkit-scrollbar {
+    display: none;
+}
